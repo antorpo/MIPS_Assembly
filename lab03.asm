@@ -28,6 +28,8 @@ cadena_1: .space 11
 cadena_2: .space 11
 cadena_3: .space 11
 
+salto: .byte 0x0A # Salto de linea
+
 .align 2 # Direccionamos el buffer a una direccion de palabra
 buffer: .space 100 # Reservamos 100B para lectura del archivo iterado.
 
@@ -58,13 +60,9 @@ Main:
 	li $a1, 11
 	syscall
 	
-	la $a0, cadena_3
-	jal largoString
+	jal abrirArchivoEntrada
 	
-	add $t0, $v0, $zero
-	imprime_str("\nLargo de la cadena 3: ")
-	imprime_int($t0)
-	j Exit
+	
 
 abrirArchivoEntrada:
 	# Abrimos archivo para lectura
@@ -74,6 +72,7 @@ abrirArchivoEntrada:
 	li $a2, 0
 	syscall
 	move $s0, $v0 # Guardamos el file descriptor 
+	jr $ra
 	
 leerArchivoEntrada:
 	# Leemos el archivo de a 100 bytes en el buffer
@@ -83,6 +82,7 @@ leerArchivoEntrada:
 	li   $a2,  100    
 	syscall            
 	move $s1, $v0 # Guardamos cantidad de caracteres leidos
+	jr $ra
 	
 abrirArchivoSalida:
 	# Abrimos el archivo para escritura 
@@ -117,15 +117,44 @@ Exit:
 # Salida: Conteo de los bytes diferentes de nulo en $v0
 largoString:
 	add $t0, $zero, $zero #  inicializa $t1 sera contador = 0
-	
+	lb $t2, salto # Debemos omitir este caracter
+			
 	Loop:	lb $t1, 0($a0) # cargamos byte inicial
 		beq $t1, $zero, return
+		beq $t1, $t2, suma # Si encontramos el salto de linea no contamos
 		addi $t0, $t0, 1 # $t0 = $t0 + 1
-		addi $a0, $a0, 1 # $a0 = $a0 + 1 direccion byte siguiente
+	suma:	addi $a0, $a0, 1 # $a0 = $a0 + 1 direccion byte siguiente
 		j Loop
 	
 	return: add $v0, $t0, $zero # $v0 = contador
 		jr $ra
+##########################################################
+
+
+##########################################################
+# Procedimiento contarFrecuencia
+# Utilidad: Cuenta la frecuencia de apariciones de una cadena
+# dentro de un texto.
+# Entrada: 
+# $a0 - direccion de la cadena
+# $a1 - direccion del buffer
+# $a2 - cantidad de datos leidos en el buffer
+# $a3 - cantidad de caracteres de la cadena
+# Salida: 
+# $v0 - cantidad de apariciones de la cadena en el texto
+
+contarFrecuencia:
+	
+	add $t0, $zero, $zero # $t0 sera el contador del buffer
+	add $t1, $zero, $zero # $t1 sera el contador de la cadena
+	add $t2, $zero, $zero # $t2 sera el contador de las repeticiones
+	
+	
+	
+
+
+
+
 ##########################################################
 	
 	

@@ -1,13 +1,12 @@
 .data 
 msg: .asciiz "El largo del String es: "
 texto: .asciiz "aSDwefosdlkmvoiwierantonioasdnmqwoieqwiondasantonioajsdoiqweoiantonioasd123"
+cadena: .asciiz "antonio"
 salto: .byte 0x0A # Salto de linea
 
 .text
 
 Main: 
-	lb $t0, salto
-	la $t1, salto
 	la $a0, texto
 	jal largoString
 
@@ -34,7 +33,8 @@ Exit:
 # Salida: Conteo de los bytes diferentes de nulo en $v0
 largoString:
 	add $t0, $zero, $zero #  inicializa $t1 sera contador = 0
-	
+	lb $t2, salto
+			
 	Loop:	lb $t1, 0($a0) # cargamos byte inicial
 		beq $t1, $zero, return
 		addi $t0, $t0, 1 # $t0 = $t0 + 1
