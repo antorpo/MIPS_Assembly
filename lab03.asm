@@ -161,9 +161,15 @@ contarFrecuencia:
 			lb $t5, 0($t3) # Almacenamos en $t4 el valor de cadena[contadorCadena]
 			
 			ifFreq: 
-				bne $t4, $t5, elseFreq
+				bne $t4, $t5, elifFreq
 				addi $t3, $t3, 1
 				addi $t1, $t1, 1
+				j endIfFreq
+			elifFreq:
+				lb $t7, 0($a0)
+				bne $t4, $t7, elseFreq
+				addi $t3, $a0, 1
+				addi $t1, $zero, 1
 				j endIfFreq
 			elseFreq:
 				add $t3, $a0, $zero
