@@ -33,12 +33,13 @@ Exit:
 # Salida: Conteo de los bytes diferentes de nulo en $v0
 largoString:
 	add $t0, $zero, $zero #  inicializa $t1 sera contador = 0
-	lb $t2, salto
+	lb $t2, salto # Debemos omitir este caracter
 			
 	Loop:	lb $t1, 0($a0) # cargamos byte inicial
 		beq $t1, $zero, return
+		beq $t1, $t2, suma
 		addi $t0, $t0, 1 # $t0 = $t0 + 1
-		addi $a0, $a0, 1 # $a0 = $a0 + 1 direccion byte siguiente
+	suma:	addi $a0, $a0, 1 # $a0 = $a0 + 1 direccion byte siguiente
 		j Loop
 	
 	return: add $v0, $t0, $zero # $v0 = contador

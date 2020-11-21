@@ -56,7 +56,60 @@ Main:
 	add $a3, $v0, $zero # $a3 guarda el largo de la cadena 1
 	
 	jal contarFrecuencia
+	move $s5, $v0
+	
+	jal cerrarArchivoEntrada
+	
+	imprime_str("\nInserte cadena #2 (longitud max: 10): ")
+	
+	li $v0, 8
+	la $a0, cadena_2
+	li $a1, 11
+	syscall
+	
+	jal abrirArchivoEntrada
+	jal leerArchivoEntrada
+	
+	la $a0, cadena_2
+	jal largoString
+
+	la $a1, buffer
+	add $a3, $v0, $zero 
+	
+	jal contarFrecuencia
+	move $s6, $v0
+	
+	jal cerrarArchivoEntrada
+	
+	imprime_str("\nInserte cadena #3 (longitud max: 10): ")
+	
+	li $v0, 8
+	la $a0, cadena_3
+	li $a1, 11
+	syscall
+	
+	jal abrirArchivoEntrada
+	jal leerArchivoEntrada
+	
+
+	la $a0, cadena_3
+	jal largoString
+
+	la $a1, buffer
+	add $a3, $v0, $zero 
+	
+	jal contarFrecuencia
 	move $s7, $v0
+	
+	jal cerrarArchivoEntrada
+	
+	# $s0 contiene el file descriptor del archivo de entrada
+	# $s1 contiene el file descriptor del archivo de salida
+	# $s5, $s6 y $s7 contienen la frecuencia de las 3 cadenas
+	
+	jal abrirArchivoSalida
+	jal escribirArchivoSalida
+	jal cerrarArchivoSalida
 	
 	j Exit
 	
@@ -88,18 +141,27 @@ abrirArchivoSalida:
 	li $a1, 9		
 	li $a2, 0		
 	syscall			
-	move $s2, $v0 # Guardamos el file descriptor	
+	move $s1, $v0 # Guardamos el file descriptor	
 	jr $ra 
 	
-# Falta insertar texto en archivo salida
+escribirArchivoSalida:
 	
-cerrarArchivos:
+	li $v0, 15		
+	move $a0, $s1		
+	la $a1, input_buffer	
+	move $a2, $t1		
+	syscall
+	jr $ra
+	
+cerrarArchivoEntrada:
 	li   $v0, 16      
 	move $a0, $s0      
-	syscall           
-	
+	syscall          
+	jr $ra 
+
+cerrarArchivoSalida:
 	li   $v0, 16       
-	move $a0, $s2   
+	move $a0, $s1   
 	syscall            
 	jr $ra
 	
