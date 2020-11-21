@@ -170,7 +170,6 @@ Exit:
 	li $v0, 10 
 	syscall
 	
-	
 ##########################################################
 # Procedimiento largoString
 # Utilidad: Determina el largo en bytes de una cadena
