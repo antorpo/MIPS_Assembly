@@ -14,55 +14,55 @@ input_buffer:	.space 20000
 
 .text
 
-# Open (for reading) a file
-	li $v0, 13		# System call for open file
-	la $a0, file_in	# Input file name
-	li $a1, 0		# Open for reading (flag = 0)
-	li $a2, 0		# Mode is ignored
-	syscall			# Open a file (file descriptor returned in $v0)
-	move $s0, $v0		# Copy file descriptor
+# Abrir (para leer) un archivo
+	li $v0, 13		# Llamada al sistema para abrir archivo
+	la $a0, file_in		# Nombre del archivo de entrada
+	li $a1, 0		# Abierto para lectura (bandera = 0)
+	li $a2, 0		# El modo se ignora
+	syscall			# Abrir un archivo (descriptor de archivo devuelto en $ v0)
+	move $s0, $v0		# Copiar descriptor de aricho
 
-# Open (for writing) a file that does not exist
-	li $v0, 13		# System call for open file
-	la $a0, file_out	# Input file name
-	li $a1, 9		# Open for writing and appending (flag = 9)
-	li $a2, 0		# Mode is ignored
-	syscall			# Open a file (file descriptor returned in $v0)
-	move $s1, $v0		# Copy file descriptor
+# Abrir (para escribir) un archivo que no existe
+	li $v0, 13		# Llamada al sistema para abrir archivo
+	la $a0, file_out	# Nombre de arcchivo de entrada
+	li $a1, 9		# abierto para escribir y agregar (bandera=9)
+	li $a2, 0		# El modo se ignora
+	syscall			# Abrir un archivo (descriptor de archivo devuelto en $ v0)
+	move $s1, $v0		# Copiar descriptor de archivo
 
-# Read from previously opened file
-	li $v0, 14		# System call for reading from file
-	move $a0, $s0		# File descriptor
-	la $a1, input_buffer	# Address of input buffer
-	li $a2, 20000		# Maximum number of characters to read
-	syscall			# Read from file
-	move $t1, $v0		# Copy number of characters read
+# Leer del archivo previamente abierto
+	li $v0, 14		# Llamada al sistema para leer del archivo
+	move $a0, $s0		# Descriptor de archivo
+	la $a1, input_buffer	# Dirección del búfer de entrada
+	li $a2, 20000		#  Número máximo de caracteres para leer
+	syscall			# Leer del archivo
+	move $t1, $v0		# Copia del número de caracteres leidos
 	
-# Process file loaded in memory
+# Archivo de proceso carga memoria
 
-	li $v0, 15		# System call for write to a file
-	move $a0, $s1		# Restore file descriptor (open for writing)
-	la $a1, input_buffer	# Address of buffer from which to write
-	move $a2, $t1		# Number of characters to write
+	li $v0, 15		# Llamada al sistema para escribir en un archivo
+	move $a0, $s1		# Restaurar el descriptor de archivo (abierto para escritura)
+	la $a1, input_buffer	# Dirección del búfer desde el cual escribir
+	move $a2, $t1		# Numero de caracteres para escribir
 	syscall
 	
-# Append a sentence to a file
+# Agregar una oración a un archivo
 
-	li $v0, 15		# System call for write to a file
-	move $a0, $s1		# Restore file descriptor (open for writing)
-	la $a1, sentence	# Address of buffer from which to write
-	li $a2, 40		# Number of characters to write
+	li $v0, 15		# Llamada al sistema para leer del archivo
+	move $a0, $s1		# Restaurar descriptor de archivo (abierto para escritura)
+	la $a1, sentence	#  Dirección del búfer desde el que escribir
+	li $a2, 40		# Numero de caracteres para escribir
 	syscall
 	
-# Close the files
+# Cerrar los archivos
  
-	li   $v0, 16       # system call for close file
-	move $a0, $s0      # file descriptor to close
-	syscall            # close file
+	li   $v0, 16       # Llamada al sistema para cerrar el archivo
+	move $a0, $s0      # Descriptor de archivo para cerrar
+	syscall            # cerrrar archivo
 	
-	li   $v0, 16       # system call for close file
-	move $a0, $s1      # file descriptor to close
-	syscall            # close file
+	li   $v0, 16       # 
+	move $a0, $s1      # 
+	syscall            # 
 			
-Exit:	li   $v0, 10		# System call for exit
+Exit:	li   $v0, 10		# Llamada al sistema para salir.
 	syscall
