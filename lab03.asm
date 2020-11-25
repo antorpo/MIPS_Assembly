@@ -1,8 +1,8 @@
 # Lab 03
+# Programacion MIPS
 # Antonio Gonzalez Restrepo - Vanessa Tocasuche Ochoa
 
-# Macro para pedir datos en ventana
-
+# Macro para escribir en el archivo
 .macro escribirarchivosalida(%descriptor, %buffer, %offset, %int)
 	
 	li $v0, 15
@@ -13,6 +13,7 @@
 	
 .end_macro
 
+# Macro para mostrar cuadro de dialogo para almacenar string
 .macro inputdialog_str (%str, %espacio)
 	.data
 	texto: .asciiz %str
@@ -28,130 +29,97 @@
 	
 .end_macro 
 
+# Macro para imprimir un mensaje al usuario
+.macro messagedialog_str(%str, %tipo)
+	.data 
+	mensaje: .asciiz %str
+	
+	# Tipo: 
+	# 0 - Error
+	# 1 - Information
+	# 2 - Warning
+	# 3 - Question
+	.text
+	li $v0, 55
+	la $a0, mensaje
+	li $a1, %tipo
+	syscall
+.end_macro 
 	
 .data
 file_input: .asciiz "testing.txt" 
 file_output: .asciiz "resultado.txt"
 
-
 salto: .byte 0x0A # Salto de linea
-separador: .byte 0x20, 0x3A, 0x20 #espacio y guión
+separador: .byte 0x20, 0x3A, 0x20 # Espacio y dos puntos.
 repeticiones: .asciiz " repeticiones. \n"
 
-.align 2 # Direccionamos el buffer a una direccion de palabra
+.align 2 # Direccionamos el buffer a una direccion de palabra.
 buffer: .space 100 # Reservamos 100B para lectura del archivo iterado.
 
-numero: .space 10 # Reservamos 3 bytes para cada numero en ascii
+numero: .space 10 # Reservamos 10 bytes para ubicar los numeros transformados en ascii.
 	
 .text 
 	
 Main:	
-	inputdialog_str("\nInserte cadena #1 (longitud max: 10): ", 11)
-		
-	jal abrirArchivoEntrada
-	jal leerArchivoEntrada
-	
-	#Calculamos largo de la cadena 1 y llenado de parametros: 
-	la $a0, cadena_M0
-	jal largoString
 
-	la $a1, buffer
-	move $a3, $v0 # $a3 guarda el largo de la cadena 1
+	# Variable contadora de cadenas: 
+	# $s6 contiene la cantidad de cadenas a analizar
+	addi $s6, $zero, 3 
 	
-	jal contarFrecuencia
-	move $s5, $v0 
-	
-	jal cerrarArchivoEntrada
-	
+	# Abrimos el archivo de escritura
 	jal abrirArchivoSalida
-	escribirarchivosalida( $s1, cadena_M0, $zero, $a3) # escribe el nombre de cadena
-	addi $t9, $zero, 3
-	escribirarchivosalida( $s1, separador, $zero, $t9) # escirbe separadores
 	
-	move $a0, $s5
-	la $a1, numero
-	jal decToAscii
-	move $t8, $v0
-	addi $t9, $zero, 10
-	sub $t9, $t9, $t8
-	escribirarchivosalida( $s1, numero, $t8, $t9)
-	addi $t9, $zero, 16
-	escribirarchivosalida( $s1, repeticiones, $zero, $t9) # escirbe separadores
-	
-	
-	
-	inputdialog_str("\nInserte cadena #2 (longitud max: 10): ", 11)
+	LoopMain: 
+		beq $s6, $zero, endLoopMain
 		
-	jal abrirArchivoEntrada
-	jal leerArchivoEntrada
+		# Perdimos la cadena a buscar, junto con el largo maximo de la misma
+		# Parametros del macro: (cadena, largoMaximo)
+		inputdialog_str("\nInserte cadena (longitud max: 10): ", 11)
+		
+		jal abrirArchivoEntrada
+		jal leerArchivoEntrada
 	
-
-	la $a0, cadena_M1
-	jal largoString
-
-	la $a1, buffer
-	move $a3, $v0 # $a3 guarda el largo de la cadena 2
+		# Calculamos el largo de la cadena con el procedimiento largoString
+		# largoString(direccionCadena)
+		la $a0, cadena_M0
+		jal largoString
+		la $a1, buffer
+		move $a3, $v0 # $a3 Guarda el largo de la cadena
 	
-	jal contarFrecuencia
-	move $s6, $v0 
+		# Llamamos el contador de frecuencias, guardamos en $s5 el valor obtenido
+		jal contarFrecuencia
+		move $s5, $v0 
 	
-	jal cerrarArchivoEntrada
+		jal cerrarArchivoEntrada
 	
-
-	escribirarchivosalida( $s1, cadena_M1, $zero, $a3) # escribe el nombre de cadena
-	addi $t9, $zero, 3
-	escribirarchivosalida( $s1, separador, $zero, $t9) # escirbe separadores
+		# Macro escribirArchivoSalida(descriptor, buffer, offset, cantidadCaracteres)
+		escribirarchivosalida( $s1, cadena_M0, $zero, $a3) # Escribimos la cadena
+		addi $t9, $zero, 3
+		escribirarchivosalida( $s1, separador, $zero, $t9) # Escribimos el separador
 	
-	move $a0, $s6
-	la $a1, numero
-	jal decToAscii
-	move $t8, $v0
-	addi $t9, $zero, 10
-	sub $t9, $t9, $t8
-	escribirarchivosalida( $s1, numero, $t8, $t9)
-	addi $t9, $zero, 16
-	escribirarchivosalida( $s1, repeticiones, $zero, $t9) # escirbe separadores
+		move $a0, $s5 
+		la $a1, numero
+		jal decToAscii # Convertimos el numero resultado de contadorFrecuencia en ASCII
 	
+		move $t8, $v0  # Guardamos el resultado del procedimiento decToAscii en $t8
+		addi $t9, $zero, 10
+		sub $t9, $t9, $t8
 	
+		escribirarchivosalida( $s1, numero, $t8, $t9) # Escribimos el numero en ASCII 
+		addi $t9, $zero, 16
+		escribirarchivosalida( $s1, repeticiones, $zero, $t9) # Escribimos el final
+		
+		# $s0 contiene el file descriptor del archivo de entrada
+		# $s1 contiene el file descriptor del archivo de salida
+		# $s5 contiene la frecuencia de aparicion de la cadena.
+		
+		addi $s6, $s6, -1
+		j LoopMain
 	
-	inputdialog_str("\nInserte cadena #3 (longitud max: 10): ", 11)
-	
-	jal abrirArchivoEntrada
-	jal leerArchivoEntrada
-	
-
-	la $a0, cadena_M2
-	jal largoString
-
-	la $a1, buffer
-	move $a3, $v0 # $a3 guarda el largo de la cadena 2
-	
-	jal contarFrecuencia
-	move $s7, $v0 
-	
-	jal cerrarArchivoEntrada
-	
-
-	escribirarchivosalida( $s1, cadena_M2, $zero, $a3) # escribe el nombre de cadena
-	addi $t9, $zero, 3
-	escribirarchivosalida( $s1, separador, $zero, $t9) # escirbe separadores
-	
-	move $a0, $s7
-	la $a1, numero
-	jal decToAscii
-	move $t8, $v0
-	addi $t9, $zero, 10
-	sub $t9, $t9, $t8
-	escribirarchivosalida( $s1, numero, $t8, $t9)
-	addi $t9, $zero, 16
-	escribirarchivosalida( $s1, repeticiones, $zero, $t9) # escirbe separadores
-	
-	# $s0 contiene el file descriptor del archivo de entrada
-	# $s1 contiene el file descriptor del archivo de salida
-	# $s5, $s6 y $s7 contienen la frecuencia de las 3 cadenas
-	
+	endLoopMain: 
 	jal cerrarArchivoSalida
-	
+	messagedialog_str("Proceso terminado con exito !", 1)
 	j Exit
 	
 
@@ -184,16 +152,7 @@ abrirArchivoSalida:
 	syscall			
 	move $s1, $v0 # Guardamos el file descriptor	
 	jr $ra 
-	
-escribirArchivoSalida:
-	
-	li $v0, 15		
-	move $a0, $s1		
-	#la $a1, input_buffer	
-	move $a2, $t1		
-	syscall
-	jr $ra
-	
+
 cerrarArchivoEntrada:
 	li   $v0, 16      
 	move $a0, $s0      
@@ -319,11 +278,19 @@ contarFrecuencia:
 	returnFreq: 	add $v0, $t2, $zero # $v0 = contador
 			jr $ra
 
-#################################################################
-# $a0 tendra el numero:
-# $a1 la direccion donde se van a guardar separados
+##########################################################
 
-# $ v0: ubicacion del primer digito del número
+
+##########################################################
+# Procedimiento decToAscii
+# Utilidad: Lee un numero en decimal y evalua cada cifra
+# y la convierte en su respectivo codigo ascii sumandole 48.
+# Entrada: 
+# $a0 - tendra el numero
+# $a1 - direccion donde se almacenara luego de la conversion
+# Salida: 
+# $v0 - desplazamiento para encontrar el primer elemento 
+# convertido en ascii
 
 decToAscii: 
 	move $t2, $a1
@@ -334,7 +301,7 @@ decToAscii:
 		#addi $t1, $t1, -1
 		
 	Loopdec:
-		bltz $a0, ReturnAscii # Salta si $a0 <= 0
+		bltz $a0, ReturnAscii # Salta si $a0 < 0
 		div $a0, $a0, 10 # %a0 = $a0 / 10
 		mfhi $t0 # $t0 guarda el residuo de la division
 		addi $t0, $t0, 48 # $t0 = $t0 + 48 (Convierte a ASCII)
@@ -347,7 +314,7 @@ decToAscii:
 		move $v0, $t1
 		jr $ra
 
-#################################################################
+##########################################################
 
 
 	
