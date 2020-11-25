@@ -205,7 +205,6 @@ largoString:
 # $v0 - cantidad de apariciones de la cadena en el texto
 
 contarFrecuencia:
-	
 	add $t2, $zero, $zero # $t2 sera el contadorRepeticiones
 	add $t1, $zero, $zero # $t1 sera el contadorCadena
 	add $t3, $a0, $zero # direccion de la cadena
@@ -215,7 +214,6 @@ contarFrecuencia:
 	add $t6, $a1, $zero # direccion del buffer
 	
 	beq $a2, $zero, returnFreq # Si ya leimos todos los datos del archivo retornamos
-	#blt $a2, $a3, returnFreq # Si los datos leidos son menores que la longitud de la cadena retornamos
 			
 	loopFreq:	bge $t0, $a2, endLoopFreq # Si contadorBuffer es mayor o igual a datosBuffer salimos.
 			lb $t4, 0($t6) # Almacenamos en $t3 el valor de buffer[contadorBuffer]
@@ -236,17 +234,14 @@ contarFrecuencia:
 				add $t3, $a0, $zero
 				add $t1, $zero, $zero
 			endIfFreq:
-			# Aca viene el segundo if contadorCadena == datosCadena
 			
-			bne $t1, $a3, elseFreq2
+			bne $t1, $a3, elseFreq2 # Aca viene el segundo if contadorCadena == datosCadena
 			addi $t2, $t2, 1
 			add $t3, $a0, $zero
 			add $t1, $zero, $zero
 			
 			elseFreq2: 
-			
-			# contadorBuffer++
-			addi $t6, $t6, 1
+			addi $t6, $t6, 1 # contadorBuffer++
 			addi $t0, $t0, 1
 			j loopFreq
 			
@@ -277,7 +272,6 @@ contarFrecuencia:
 			
 	returnFreq: 	add $v0, $t2, $zero # $v0 = contador
 			jr $ra
-
 ##########################################################
 
 
@@ -286,19 +280,16 @@ contarFrecuencia:
 # Utilidad: Lee un numero en decimal y evalua cada cifra
 # y la convierte en su respectivo codigo ascii sumandole 48.
 # Entrada: 
-# $a0 - tendra el numero
-# $a1 - direccion donde se almacenara luego de la conversion
+# $a0 - Tendra el numero
+# $a1 - Direccion donde se almacenara luego de la conversion
 # Salida: 
-# $v0 - desplazamiento para encontrar el primer elemento 
+# $v0 - Desplazamiento para encontrar el primer elemento 
 # convertido en ascii
 
 decToAscii: 
 	move $t2, $a1
 	addi $t2, $t2, 9
 	add $t1, $zero, 10	#Contador de número de digitos
-	
-	#bne $a0, $zero, Loopdec
-		#addi $t1, $t1, -1
 		
 	Loopdec:
 		bltz $a0, ReturnAscii # Salta si $a0 < 0

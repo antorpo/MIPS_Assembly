@@ -1,7 +1,0 @@
- while(numero > 0) {
-
-            resultado += numero % 10;
-
-            numero = numero / 10;
-
-        }
