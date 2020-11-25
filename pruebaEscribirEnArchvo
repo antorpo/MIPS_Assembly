@@ -1,157 +1,72 @@
 # Lab 03
 # Antonio Gonzalez Restrepo - Vanessa Tocasuche Ochoa
 
-# Macro para pedir datos en ventana
-
-.macro escribirarchivosalida(%descriptor, %buffer, %offset, %int)
-	
-	li $v0, 15
-	move $a0, %descriptor
-	la $a1, %buffer(%offset)
-	move $a2, %int
+# Macro para imprimir el String especificado
+.macro imprime_str (%str)
+	.data
+texto: .asciiz %str
+	.text
+	li $v0, 4
+	la $a0, texto
 	syscall
-	
 .end_macro
 
-.macro inputdialog_str (%str, %espacio)
-	.data
-	texto: .asciiz %str
-	.align 2
-	cadena: .space %espacio
-	
-	.text
-	li $v0, 54
-	la $a0, texto
-	la $a1, cadena
-	li $a2, %espacio
+# Macro para imprimir el entero especificado (NO SE NECESITA REALMENTE SOLO PARA PRUEBAS)
+.macro imprime_int (%x)
+	li $v0, 1
+	add $a0, $zero, %x
 	syscall
-	
-.end_macro 
+.end_macro
 
-	
 .data
-file_input: .asciiz "testing.txt" 
-file_output: .asciiz "resultado.txt"
+file_input: 	.asciiz "testing.txt" 
+file_output: 	.asciiz "resultado.txt"
 
+# Creamos el espacio para almacenar las cadenas a identificar
+cadena_1: 	.space 11
+resultado_1: 	.space 11
 
 salto: .byte 0x0A # Salto de linea
-separador: .byte 0x20, 0x3A, 0x20 #espacio y guión
-repeticiones: .asciiz " repeticiones. \n"
 
 .align 2 # Direccionamos el buffer a una direccion de palabra
 buffer: .space 100 # Reservamos 100B para lectura del archivo iterado.
-
-numero: .space 10 # Reservamos 3 bytes para cada numero en ascii
 	
 .text 
 	
 Main:	
-	inputdialog_str("\nInserte cadena #1 (longitud max: 10): ", 11)
-		
+	# CADENA1 ####################
+	
+	imprime_str("\nInserte cadena #1 (longitud max: 10): ")
+	
+	# Leemos la cadena 1
+	li $v0, 8
+	la $a0, cadena_1
+	li $a1, 11
+	syscall
+	
 	jal abrirArchivoEntrada
 	jal leerArchivoEntrada
 	
 	#Calculamos largo de la cadena 1 y llenado de parametros: 
-	la $a0, cadena_M0
+	la $a0, cadena_1
 	jal largoString
 
 	la $a1, buffer
-	move $a3, $v0 # $a3 guarda el largo de la cadena 1
+	add $a3, $v0, $zero # $a3 guarda el largo de la cadena 1
 	
 	jal contarFrecuencia
-	move $s5, $v0 
+	move $s5, $v0
+	
+	####
+	#la $s5, 0x10010024
 	
 	jal cerrarArchivoEntrada
+	jal salida
 	
-	jal abrirArchivoSalida
-	escribirarchivosalida( $s1, cadena_M0, $zero, $a3) # escribe el nombre de cadena
-	addi $t9, $zero, 3
-	escribirarchivosalida( $s1, separador, $zero, $t9) # escirbe separadores
-	
-	move $a0, $s5
-	la $a1, numero
-	jal decToAscii
-	move $t8, $v0
-	addi $t9, $zero, 10
-	sub $t9, $t9, $t8
-	escribirarchivosalida( $s1, numero, $t8, $t9)
-	addi $t9, $zero, 16
-	escribirarchivosalida( $s1, repeticiones, $zero, $t9) # escirbe separadores
-	
-	
-	
-	inputdialog_str("\nInserte cadena #2 (longitud max: 10): ", 11)
-		
-	jal abrirArchivoEntrada
-	jal leerArchivoEntrada
-	
-
-	la $a0, cadena_M1
-	jal largoString
-
-	la $a1, buffer
-	move $a3, $v0 # $a3 guarda el largo de la cadena 2
-	
-	jal contarFrecuencia
-	move $s6, $v0 
-	
-	jal cerrarArchivoEntrada
-	
-
-	escribirarchivosalida( $s1, cadena_M1, $zero, $a3) # escribe el nombre de cadena
-	addi $t9, $zero, 3
-	escribirarchivosalida( $s1, separador, $zero, $t9) # escirbe separadores
-	
-	move $a0, $s6
-	la $a1, numero
-	jal decToAscii
-	move $t8, $v0
-	addi $t9, $zero, 10
-	sub $t9, $t9, $t8
-	escribirarchivosalida( $s1, numero, $t8, $t9)
-	addi $t9, $zero, 16
-	escribirarchivosalida( $s1, repeticiones, $zero, $t9) # escirbe separadores
-	
-	
-	
-	inputdialog_str("\nInserte cadena #3 (longitud max: 10): ", 11)
-	
-	jal abrirArchivoEntrada
-	jal leerArchivoEntrada
-	
-
-	la $a0, cadena_M2
-	jal largoString
-
-	la $a1, buffer
-	move $a3, $v0 # $a3 guarda el largo de la cadena 2
-	
-	jal contarFrecuencia
-	move $s7, $v0 
-	
-	jal cerrarArchivoEntrada
-	
-
-	escribirarchivosalida( $s1, cadena_M2, $zero, $a3) # escribe el nombre de cadena
-	addi $t9, $zero, 3
-	escribirarchivosalida( $s1, separador, $zero, $t9) # escirbe separadores
-	
-	move $a0, $s7
-	la $a1, numero
-	jal decToAscii
-	move $t8, $v0
-	addi $t9, $zero, 10
-	sub $t9, $t9, $t8
-	escribirarchivosalida( $s1, numero, $t8, $t9)
-	addi $t9, $zero, 16
-	escribirarchivosalida( $s1, repeticiones, $zero, $t9) # escirbe separadores
 	
 	# $s0 contiene el file descriptor del archivo de entrada
 	# $s1 contiene el file descriptor del archivo de salida
 	# $s5, $s6 y $s7 contienen la frecuencia de las 3 cadenas
-	
-	jal cerrarArchivoSalida
-	
 	j Exit
 	
 
@@ -211,21 +126,22 @@ Exit:
 	li $v0, 10 
 	syscall
 	
+	
 ##########################################################
 # Procedimiento largoString
 # Utilidad: Determina el largo en bytes de una cadena
 # Entrada: Apuntador al primer byte de la cadena en $a0
 # Salida: Conteo de los bytes diferentes de nulo en $v0
 largoString:
-	add $t0, $zero, $zero #  inicializa $t1 sera contador = 0
-	lb $t2, salto # Debemos omitir este caracter
+	add $t0, $zero, $zero 	#  inicializa $t1 sera contador = 0
+	lb $t2, salto 		# Debemos omitir este caracter
 	add $t3, $a0, $zero
 			
 	Loop:	lb $t1, 0($t3) # cargamos byte inicial
 		beq $t1, $zero, return
 		beq $t1, $t2, suma # Si encontramos el salto de linea no contamos
 		addi $t0, $t0, 1 # $t0 = $t0 + 1
-	suma:	addi $t3, $t3, 1 # $a0 = $a0 + 1 direccion byte siguiente
+	suma:	addi $t3, $t3, 1 # $t3 = $t3 + 1 direccion byte siguiente
 		j Loop
 	
 	return: add $v0, $t0, $zero # $v0 = contador
@@ -252,8 +168,8 @@ contarFrecuencia:
 	add $t3, $a0, $zero # direccion de la cadena
 	
 	asignaFreq:
-	add $t0, $zero, $zero # $t0 sera el contadorBuffer
-	add $t6, $a1, $zero # direccion del buffer
+	add $t0, $zero, $zero 	# $t0 sera el contadorBuffer
+	add $t6, $a1, $zero 	# direccion del buffer
 	
 	beq $a2, $zero, returnFreq # Si ya leimos todos los datos del archivo retornamos
 	#blt $a2, $a3, returnFreq # Si los datos leidos son menores que la longitud de la cadena retornamos
@@ -319,36 +235,50 @@ contarFrecuencia:
 	returnFreq: 	add $v0, $t2, $zero # $v0 = contador
 			jr $ra
 
-#################################################################
-# $a0 tendra el numero:
-# $a1 la direccion donde se van a guardar separados
 
-# $ v0: ubicacion del primer digito del número
-
-decToAscii: 
-	move $t2, $a1
-	addi $t2, $t2, 9
-	add $t1, $zero, 10	#Contador de número de digitos
+##########################################################
 	
-	#bne $a0, $zero, Loopdec
-		#addi $t1, $t1, -1
+##########################################################
+# Procedimiento de copiar en Archivo de salida resultado
+# Utilidad: Copia en archivo el resultado: Cadena buscada y 
+# número de veces que se encontró.
+# Entrada: 
+# $a0 - direccion de la cadena
+# $S5 - contadorRepeticiones ********************************************¿se puede s5?
+# Salida: 
+# $v0 - cantidad de apariciones de la cadena en el texto
+
+salida:
+	
+	# Abrir (para escribir) un archivo que no existe
+		li $v0, 13		# Llamada al sistema para abrir archivo
+		la $a0, file_output	# Nombre de arcchivo de entrada
+		li $a1, 9		# abierto para escribir y agregar 
+		li $a2, 0		# El modo se ignora
+		syscall			# Abrir un archivo (descriptor de archivo devuelto en $ v0)
+		move $s1, $v0		# Copiar descriptor de archivo
 		
-	Loopdec:
-		bltz $a0, ReturnAscii # Salta si $a0 <= 0
-		div $a0, $a0, 10 # %a0 = $a0 / 10
-		mfhi $t0 # $t0 guarda el residuo de la division
-		addi $t0, $t0, 48 # $t0 = $t0 + 48 (Convierte a ASCII)
-		sb $t0, 0($t2) # Guardamos $t0 en la memoria
-		addi $t2, $t2, -1 # Nos movemos a la siguiente posicion de memoria
-		addi $t1, $t1, -1
-		beq $a0, $zero, ReturnAscii
-		j Loopdec
-	ReturnAscii:
-		move $v0, $t1
+	# Agregar una oración al archivo
+
+		li $v0, 15		# Llamada al sistema para leer del archivo
+		move $a0, $s1		# Restaurar descriptor de archivo (abierto para escritura)
+		la $a1, cadena_1	# Dirección del búfer desde el que escribir
+		li $a2, 10		# Numero de caracteres para escribir
+		syscall
+		
+		li $v0, 15		# Llamada al sistema para leer del archivo
+		move $a0, $s1		# Restaurar descriptor de archivo (abierto para escritura)
+		add $t2, $s5, $zero
+		sw $v0, ($t2)
+		la $a1, resultado_1
+		li $a2, 10		# Numero de caracteres para escribir
+		syscall
 		jr $ra
-
-#################################################################
-
-
 	
+			
+cerrarArchivoDeSalida:
 	
+	li   $v0, 16       # system call for close file
+	move $a0, $s1      # file descriptor to close
+	syscall            # close file
+	jr $ra
